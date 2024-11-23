@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -7,11 +7,22 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import ImageUpload from "./image-upload";
-
+import { useDispatch, useSelector } from "react-redux";
+import { getAllProducts } from "@/Store/Admin-slice/product-slice";
 function AdminViewProducts() {
   const [openCreateProductDialog, setOpenCreateProductDialog] = useState(false);
+  const [isImageLoading, setIsIamgeLoading] = useState(false);
   const [uploadedImageUrl, setUploadedImageUrl] = useState("");
   const [imageFile, setImageFile] = useState(false);
+
+  const selector = useSelector((state) => state.product);
+  const dispatch = useDispatch();
+
+  const { isLoading, products } = selector;
+
+  useEffect(() => {
+    dispatch(getAllProducts());
+  }, []);
 
   return (
     <>
@@ -19,6 +30,32 @@ function AdminViewProducts() {
         <Button onClick={() => setOpenCreateProductDialog(true)}>
           Add New Product
         </Button>
+
+        {isLoading ? (
+          <h1>Loading .....</h1>
+        ) : (
+          products.map((product) => {
+            return (
+              <div key={product._id} className="p-4 border rounded-md">
+                <div className="flex items-center space-x-4">
+                  <img
+                    src={product.image}
+                    alt={product.title}
+                    className="w-16 h-16 object-cover rounded-md"
+                  />
+                  <div>
+                    <h1 className="text-lg font-medium">{product.title}</h1>
+                    <p className="text-sm text-gray-500">
+                      {product.description.length > 100
+                        ? product.description.substring(0, 100) + "..."
+                        : product.description}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            );
+          })
+        )}
 
         <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-4 ">
           <Sheet
@@ -34,6 +71,8 @@ function AdminViewProducts() {
                 setUploadedImageUrl={setUploadedImageUrl}
                 imageFile={imageFile}
                 setImageFile={setImageFile}
+                isImageLoading={isImageLoading}
+                setIsIamgeLoading={setIsIamgeLoading}
               />
 
               <div className="py-6">
@@ -163,7 +202,7 @@ function AdminViewProducts() {
                   <div>
                     <button
                       type="submit"
-                      className="w-full bg-black text-white p-2 rounded-md hover:bg-gray-800 focus:bg-black focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 transition-colors duration-300"
+                      className="w-full bg-black text-white p-2 rounded-md hover:bg-gray-800 focus:outline-none focus:bg-black focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 transition-colors duration-300"
                     >
                       Create Product
                     </button>

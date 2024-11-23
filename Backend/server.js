@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 dotenv.config();
 import connectToDb from "./Config/db.config.js";
 import userRouter from "./Routes/user-Routes.js";
+import productRouter from "./Routes/product-routes.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 
@@ -23,11 +24,12 @@ app.use(
       "Expires",
       "Pragma",
     ],
-    credentials: true, // enable set cookies in the response
+    credentials: true,
   })
 );
 app.use(express.json());
 app.use("/auth", userRouter);
+app.use("/products", productRouter);
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);

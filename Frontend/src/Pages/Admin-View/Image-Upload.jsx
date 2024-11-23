@@ -1,12 +1,16 @@
 import { Button } from "@/components/ui/button";
+import axios from "axios";
 import { FileIcon, UploadCloudIcon, XIcon } from "lucide-react";
-import React, { createRef } from "react";
+import React, { createRef, useEffect } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 function ImageUpload({
   imageFile,
   setImageFile,
   uploadedImageUrl,
   setUploadedImageUrl,
+  isImageLoading,
+  setIsIamgeLoading,
 }) {
   const inputRef = createRef(null);
 
@@ -38,6 +42,33 @@ function ImageUpload({
     }
   };
 
+  const uploadImage = async () => {
+    try {
+      setIsIamgeLoading(true);
+      const data = new FormData();
+      data.append("file", imageFile);
+      const responce = await axios.post(
+        "http://localhost:5001/products/upload-image",
+        data
+      );
+
+      if (responce.status == 200) {
+        setUploadedImageUrl(responce?.data?.result?.url);
+      }
+      console.log(responce);
+    } catch (error) {
+      console.log(error.message);
+    } finally {
+      setIsIamgeLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (imageFile) {
+      uploadImage();
+    }
+  }, [imageFile]);
+
   return (
     <>
       <div className="w-full mt-4 max-w-md mx-auto">
@@ -65,6 +96,8 @@ function ImageUpload({
               <UploadCloudIcon className="w-10 h-10 to-muted-foreground mb-2" />
               <span>Drag & Drop or click to upload image</span>
             </label>
+          ) : isImageLoading ? (
+            <Skeleton className="w-full h-[20px]" />
           ) : (
             <div className="flex items-center justify-between">
               <div className="flex items-center">
